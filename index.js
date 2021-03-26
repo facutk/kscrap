@@ -4,26 +4,20 @@ const express = require("express");
 const app = express();
 const port = process.env.PORT || 5000
 const puppeteer = require("puppeteer");
+const { htmlToText } = require('html-to-text');
 
 app.get("/scrap/:site", async (req, res) => {
-  // res.send(req.params.site);
   const browser = await puppeteer.launch({
     args: ["--no-sandbox", "--disable-setuid-sandbox"]
   });
   const page = await browser.newPage();
   await page.goto(`https://${req.params.site}`);
 
-  // Get the "viewport" of the page, as reported by the page.
-  const dimensions = await page.evaluate(() => {
-    return {
-      width: document.documentElement.clientWidth,
-      height: document.documentElement.clientHeight,
-      deviceScaleFactor: window.devicePixelRatio
-    };
-  });
+  const data = await page.evaluate(() => document.querySelector('*').outerHTML);
 
-  console.log("Dimensions:", dimensions);
-  res.send(dimensions);
+  const text = htmlToText(data);
+  res.send(`<pre>${text}</pre>`);
+
   await browser.close();
 });
 
