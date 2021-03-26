@@ -12,7 +12,7 @@ app.get("/scrap/:site", async (req, res) => {
   });
   const page = await browser.newPage();
   await page.goto(`https://${req.params.site}`);
-
+  await page.waitForTimeout(5000);
   const data = await page.evaluate(() => document.querySelector('*').outerHTML);
 
   const text = htmlToText(data);
